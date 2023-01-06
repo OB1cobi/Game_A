@@ -1,54 +1,79 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class Moovy : MonoBehaviour
 {
-    public float speed = 5f; // the speed at which the player moves
-    public float jumpForce = 5f; // the force with which the player jumps
-    public float gravity = -9.81f; // the gravity to apply to the player
-    public LayerMask groundLayerMask; // the layer mask for the ground
-    public Transform groundCheck; // the transform used to check if the player is on the ground
-    public float groundCheckRadius = 0.1f; // the radius of the ground check
+    private float horizontalMovement;
+    private float verticalMovement;
+    public float airMultiplier;
 
-    private CharacterController characterController; // the character controller component
-    private Vector3 velocity; // the velocity of the player
-    private bool isGrounded; // whether or not the player is grounded
+    // A field editable from inside Unity with a default value of 5
+    public float speed = 5.0f;
+
+    // A field for the player's running speed
+    public float runningSpeed = 15f;
+
+    // A field for the player's jump force
+    public float jumpForce = 5f;
+
+    // How much will the player slide on the ground
+    // The lower the value, the greater distance the user will slide
+    public float drag;
+
+    private Rigidbody rb;
+    private bool isOnGround;
 
     // Start is called before the first frame update
     void Start()
     {
-        characterController = GetComponent<CharacterController>();
+        rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
     }
 
     // Update is called once per frame
     void Update()
     {
-        // check if the player is grounded
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayerMask);
+        // Shout a short raycast downward to check if the player is standing on something
+        float gameObjectHeight = gameObject.transform.localScale.y;
+        isOnGround = Physics.Raycast(transform.position, Vector3.down, gameObjectHeight + 0.1f);
 
-        // if the player is grounded, reset their velocity
-        if (isGrounded && velocity.y < 0)
+        // This will detect forward and backward movement
+        horizontalMovement = Input.GetAxisRaw("Horizontal");
+
+        // This will detect sideways movement
+        verticalMovement = Input.GetAxisRaw("Vertical");
+
+        // Calculate the direction to move the player
+        Vector3 movementDirection = transform.forward * verticalMovement + transform.right * horizontalMovement;
+
+        // Apply drag only if on the ground
+        if (isOnGround)
         {
-            velocity.y = -2f;
+            rb.drag = drag;
+        }
+        else
+        {
+            rb.drag = 0;
+            movementDirection *= airMultiplier;
+        }
+        // If left shift is held down, use the runningSpeed as the speed
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            rb.AddForce(movementDirection * runningSpeed, ForceMode.Force);
+        }
+        // Else (left shift is not held down) use the normal speed
+        else
+        {
+            // Move the player
+            rb.AddForce(movementDirection * speed, ForceMode.Force);
         }
 
-        // get input from the horizontal and vertical axes
-        float horizontalInput = Input.GetAxisRaw("Horizontal");
-        float verticalInput = Input.GetAxisRaw("Vertical");
-
-        // set the movement direction based on the input
-        Vector3 movement = transform.right * horizontalInput + transform.forward * verticalInput;
-
-        // apply gravity to the player
-        velocity.y += gravity * Time.deltaTime;
-
-        // move the player
-        characterController.Move(movement * speed * Time.deltaTime);
-        characterController.Move(velocity * Time.deltaTime);
-
-        // jump if the player is on the ground and the jump button is pressed
-        if (isGrounded && Input.GetButtonDown("Jump"))
+        // If space is pressed, add force in an upward direction (jump)
+        if (Input.GetKeyDown(KeyCode.Space) && isOnGround)
         {
-            velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
+            // Add force in an upward direction (jump)
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
     }
 }
