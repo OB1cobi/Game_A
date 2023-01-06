@@ -4,10 +4,20 @@ using UnityEngine;
 
 public class Looky : MonoBehaviour
 {
+    public GameObject lookTarget; // Declare the look target variable
+    public GameObject capsule; // Declare the capsule variable
+
     float yaw = 0.0f;
     float pitch = 0.0f;
 
     public float sensitivity = 15f;
+
+    void Start()
+    {
+        // Initialize the look target and capsule variables
+        lookTarget = GameObject.Find("lookTarget");
+        capsule = GameObject.Find("Player");
+    }
 
     void Update()
     {
@@ -20,5 +30,11 @@ public class Looky : MonoBehaviour
 
         // Apply yaw and pitch to the camera's rotation
         transform.rotation = Quaternion.Euler(pitch, yaw, 0.0f);
+
+        // Rotate the look target object
+        lookTarget.transform.rotation = Quaternion.Euler(pitch, yaw, 0.0f);
+
+        // Apply the yaw value to the capsule's Y axis
+        capsule.transform.rotation = Quaternion.Euler(0.0f, yaw, 0.0f);
     }
 }
