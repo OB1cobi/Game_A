@@ -4,15 +4,21 @@ using UnityEngine;
 
 public class Looky : MonoBehaviour
 {
-    float rotationX = 0f;
-    float rotationY = 0f;
+    float yaw = 0.0f;
+    float pitch = 0.0f;
 
     public float sensitivity = 15f;
 
     void Update()
     {
-        rotationY += Input.GetAxis("Mouse X") * sensitivity;
-        rotationX += Input.GetAxis("Mouse Y") * -1 * sensitivity;
-        transform.localEulerAngles = new Vector3(rotationX, rotationY, 0);
+        // yaw and pitch get linked to mouse movement
+        yaw += Input.GetAxis("Mouse X");
+        pitch -= Input.GetAxis("Mouse Y");
+
+        // Clamp pitch to restrict Y movement
+        pitch = Mathf.Clamp(pitch, -90.0f, 90.0f);
+
+        // Apply yaw and pitch to the camera's rotation
+        transform.rotation = Quaternion.Euler(pitch, yaw, 0.0f);
     }
 }
