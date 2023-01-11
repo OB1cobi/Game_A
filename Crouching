@@ -1,1 +1,41 @@
 
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class crouchy : MonoBehaviour
+{
+[Header("Crouching")]
+public float crouchSpeed = 0.2f;
+public float crouchYScale = 0.5f;
+public KeyCode crouchKey;
+private float startYScale;
+private Rigidbody rb;
+
+private void Start() {
+    startYScale = transform.localScale.y;
+    rb = GetComponent<Rigidbody>();
+}
+
+private void Update() {
+    if (Input.GetKeyDown(crouchKey)) {
+        Crouch();
+    }
+    if (Input.GetKeyUp(crouchKey)) {
+        StandUp();
+    }
+}
+
+private void Crouch() {
+    transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
+    rb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
+    //Reducing speed while crouching 
+    crouchSpeed = 0.1f;
+}
+
+private void StandUp() {
+    transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
+    crouchSpeed = 0.2f;
+}
+
+}
