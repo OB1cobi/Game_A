@@ -7,7 +7,7 @@ public class Moovy : MonoBehaviour
     private float horizontalMovement;
     private float verticalMovement;
     public float airMultiplier;
-    
+
 
     // A field editable from inside Unity with a default value of 5
     public float speed = 5.0f;
@@ -39,37 +39,49 @@ public class Moovy : MonoBehaviour
         float gameObjectHeight = gameObject.transform.localScale.y;
         isOnGround = Physics.Raycast(transform.position, Vector3.down, gameObjectHeight + 0.1f);
 
-        // This will detect forward and backward movement
-        horizontalMovement = Input.GetAxisRaw("Horizontal");
 
-        // This will detect sideways movement
-        verticalMovement = Input.GetAxisRaw("Vertical");
 
-        // Calculate the direction to move the player
-        Vector3 movementDirection = transform.forward * verticalMovement + transform.right * horizontalMovement;
+        // Get the raw input values
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+
+        // Create a new vector from the input values
+        Vector3 input = new Vector3(horizontal, 0, vertical);
+
+        // Clamp the magnitude of the input vector to 1
+        input = Vector3.ClampMagnitude(input, 1);
+
+        // Transform the input vector to be relative to the character's rotation
+        Vector3 movementDirection = transform.TransformDirection(input);
+
+        // Move the player based on the transformed input vector
+        if (movementDirection.magnitude > 0)
+        {
+            rb.MovePosition(transform.position + movementDirection * speed * Time.deltaTime);
+        }
 
         // Apply drag only if on the ground
         if (isOnGround)
         {
-            
+
             rb.drag = drag;
         }
         else
         {
             rb.drag = 0;
             movementDirection *= airMultiplier;
-            
+
         }
         // If left shift is held down, use the runningSpeed as the speed
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            rb.AddForce(movementDirection * runningSpeed, ForceMode.Force);
+            rb.AddForce(movementDirection * runningSpeed * Time.deltaTime, ForceMode.Force);
         }
         // Else (left shift is not held down) use the normal speed
         else
         {
             // Move the player
-            rb.AddForce(movementDirection * speed, ForceMode.Force);
+            rb.AddForce(movementDirection * speed * Time.deltaTime, ForceMode.Force);
         }
 
         // If space is pressed, add force in an upward direction (jump)
