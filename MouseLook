@@ -4,37 +4,41 @@ using UnityEngine;
 
 public class Looky : MonoBehaviour
 {
-    public GameObject lookTarget; // Declare the look target variable
-    public GameObject capsule; // Declare the capsule variable
 
     float yaw = 0.0f;
     float pitch = 0.0f;
+    public Transform capsule;
 
     public float sensitivity = 15f;
 
     void Start()
     {
-        // Initialize the look target and capsule variables
-        lookTarget = GameObject.Find("lookTarget");
-        capsule = GameObject.Find("Player");
+        //hides the mouse
+		//Cursor.lockState = CursorLockMode.Locked;
+		//Cursor.visible = false; 
     }
 
     void Update()
     {
         // yaw and pitch get linked to mouse movement
-        yaw += Input.GetAxis("Mouse X");
-        pitch -= Input.GetAxis("Mouse Y");
+        yaw += Input.GetAxisRaw("Mouse X");
+        pitch -= Input.GetAxisRaw("Mouse Y");
 
         // Clamp pitch to restrict Y movement
         pitch = Mathf.Clamp(pitch, -90.0f, 90.0f);
 
         // Apply yaw and pitch to the camera's rotation
         transform.rotation = Quaternion.Euler(pitch, yaw, 0.0f);
-
-        // Rotate the look target object
-        lookTarget.transform.rotation = Quaternion.Euler(pitch, yaw, 0.0f);
-
-        // Apply the yaw value to the capsule's Y axis
+        
+        /*
+        Apply the yaw value to the capsule's Y axis.
+        this for some reason lets me look left and right and still
+        walk forward. (because the bean rotates with the camera.
+        If im not making any sense then remove this and youll 
+        see what I mean. Its really weird and this is the solution
+        I found that worked.
+        */
+       
         capsule.transform.rotation = Quaternion.Euler(0.0f, yaw, 0.0f);
     }
 }
