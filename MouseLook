@@ -21,8 +21,8 @@ public class Looky : MonoBehaviour
     void Update()
     {
         // yaw and pitch get linked to mouse movement
-        yaw += Input.GetAxisRaw("Mouse X");
-        pitch -= Input.GetAxisRaw("Mouse Y");
+        yaw += Input.GetAxis("Mouse X") * sensitivity;
+    	pitch -= Input.GetAxis("Mouse Y") * sensitivity;
 
         // Clamp pitch to restrict Y movement
         pitch = Mathf.Clamp(pitch, -90.0f, 90.0f);
